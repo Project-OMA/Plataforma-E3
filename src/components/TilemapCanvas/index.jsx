@@ -239,7 +239,8 @@ export function TilemapCanvas() {
                     ...selectedSprite,
                     x: col,
                     y: row,
-                    children: children
+                    children: children,
+                    programmable: false
                 });
 
                 return { ...l, sprites: updatedSprites };
