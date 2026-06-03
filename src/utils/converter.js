@@ -104,7 +104,12 @@ function resetProgrammableCounters() {
 }
 
 function generateProgrammableId(baseName) {
-    const normalizedBaseName = String(baseName).trim().toUpperCase();
+    const normalizedBaseName = String(baseName)
+        .trim()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^A-Za-z0-9]/g, "")
+        .toUpperCase();
 
     programmableCounters[normalizedBaseName] =
         (programmableCounters[normalizedBaseName] ?? 0) + 1;
