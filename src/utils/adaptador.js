@@ -46,8 +46,18 @@ export function adaptarAppJsonParaE3Map(appJson) {
             if (sprite.programmable) {
                 programmableSprites.push({
                     layer: targetGridName,
-                    x: sprite.x,
-                    y: sprite.y
+                    cells: sprite.children.map(child => ({
+                        x: child.x,
+                        y: child.y
+                    }))
+                });
+            }
+
+            if (sprite.translate === "piano") {
+                console.log({
+                    spriteX: sprite.x,
+                    spriteY: sprite.y,
+                    children: sprite.children
                 });
             }
         }

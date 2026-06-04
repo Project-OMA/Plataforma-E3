@@ -97,6 +97,14 @@ function applyTileConversion(layer, optimizationFunc) {
     return allTiles;
 }
 
+function buildProgrammableLookup(programmableSprites = []) {
+    return new Set(
+        programmableSprites.flatMap(sprite =>
+            sprite.cells.map(cell => `${sprite.layer}:${cell.x}:${cell.y}`)
+        )
+    );
+}
+
 function resetProgrammableCounters() {
     Object.keys(programmableCounters).forEach(key => {
         delete programmableCounters[key];
@@ -115,12 +123,6 @@ function generateProgrammableId(baseName) {
         (programmableCounters[normalizedBaseName] ?? 0) + 1;
 
     return `${normalizedBaseName}${programmableCounters[normalizedBaseName] - 1}`;
-}
-
-function buildProgrammableLookup(programmableSprites = []) {
-    return new Set(
-        programmableSprites.map(sprite => `${sprite.layer}:${sprite.x}:${sprite.y}`)
-    );
 }
 
 function addProgrammableIds(objects, layerName, programmableLookup, category) {
