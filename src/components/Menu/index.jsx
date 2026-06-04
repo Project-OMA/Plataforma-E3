@@ -55,7 +55,6 @@ export function Menu(){
     const save = () => {
         let fileString = ''
         if(fileFormat == 'json'){
-            console.log('SALVANDO EM JSON')
 
             const e3Map = adaptarAppJsonParaE3Map(tilemap);
             const map = convertMap(e3Map);
