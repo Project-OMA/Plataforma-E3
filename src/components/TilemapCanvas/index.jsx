@@ -11,10 +11,10 @@ import { FaArrowsRotate, FaTrash } from "react-icons/fa6";
 export function TilemapCanvas() {
     const spriteSheetMap = useSpriteSheetMap(spritesMap);
 
-    const { 
-        tilemap, setTilemap, 
-        selectedSprite, 
-        selectedLayerSprite, setSelectedLayerSprite, 
+    const {
+        tilemap, setTilemap,
+        selectedSprite,
+        selectedLayerSprite, setSelectedLayerSprite,
         setHistory,
         hoverCell, setHoverCell,
         selectedLayer, setSelectedLayer
@@ -25,7 +25,7 @@ export function TilemapCanvas() {
     const NUM_COLS = tilemap.width;
 
     const canvasRef = useRef(null);
-
+    const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
     const [scale, setScale] = useState(1);
     const [offset, setOffset] = useState({ x: 0, y: 0 });
     const [isDrawing, setIsDrawing] = useState(false);
@@ -54,9 +54,9 @@ export function TilemapCanvas() {
                 const y = sprite.y * gridSize;
 
                 ctx.save();
-               
+
                 ctx.translate(x + width / 2, y + height / 2);
-                
+
                 ctx.drawImage(
                     image,
                     -width / 2,
@@ -75,10 +75,14 @@ export function TilemapCanvas() {
         if (!canvas) return;
 
         const resizeCanvas = () => {
-            canvas.width = canvas.clientWidth;
-            canvas.height = canvas.clientHeight;
-        };
+            const width = canvas.clientWidth;
+            const height = canvas.clientHeight;
 
+            canvas.width = width;
+            canvas.height = height;
+
+            setCanvasSize({ width, height });
+        };
         resizeCanvas();
 
         const observer = new ResizeObserver(resizeCanvas);
@@ -87,9 +91,11 @@ export function TilemapCanvas() {
         return () => observer.disconnect();
     }, []);
 
-    
-    useEffect(() => { 
+
+    useEffect(() => {
         const canvas = canvasRef.current;
+        if (!canvas || canvas.width === 0 || canvas.height === 0) return;
+
         const ctx = canvas.getContext("2d");
 
         ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -104,16 +110,16 @@ export function TilemapCanvas() {
 
         drawTilemap(ctx, tilemap, TILE_SIZE);
 
-        
+
         for (let y = 0; y < NUM_ROWS; y++) {
             for (let x = 0; x < NUM_COLS; x++) {
                 ctx.strokeStyle = "rgba(0,0,0,0.2)";
                 ctx.strokeRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
             }
         }
-        
+
         if (hoverCell) {
-           
+
             const [spriteCols = 1, spriteRows = 1] = selectedSprite.size || [];
 
             const hoverImage = spriteSheetMap[selectedSprite.path];
@@ -132,12 +138,12 @@ export function TilemapCanvas() {
             ctx.save();
             ctx.strokeStyle = 'rgba(1, 159, 206, 1)';
             ctx.lineWidth = 2;
-            ctx.strokeRect( hoverCell.col * TILE_SIZE, hoverCell.row * TILE_SIZE, TILE_SIZE * spriteCols, TILE_SIZE * spriteRows );
+            ctx.strokeRect(hoverCell.col * TILE_SIZE, hoverCell.row * TILE_SIZE, TILE_SIZE * spriteCols, TILE_SIZE * spriteRows);
             ctx.restore();
         }
 
         if (selectedLayerSprite) {
-            
+
             const [spriteCols = 1, spriteRows = 1] = selectedLayerSprite.size || [];
 
             ctx.save();
@@ -151,7 +157,7 @@ export function TilemapCanvas() {
             );
             ctx.restore();
         }
-    }, [tilemap, scale, hoverCell, selectedLayerSprite]);
+    }, [tilemap, scale, offset, hoverCell, selectedLayerSprite, canvasSize, spriteSheetMap]);
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -194,17 +200,17 @@ export function TilemapCanvas() {
 
         const canvasX = (mouseX - canvas.width / 2 - offset.x) / scale + (NUM_COLS * TILE_SIZE) / 2;
         const canvasY = (mouseY - canvas.height / 2 - offset.y) / scale + (NUM_ROWS * TILE_SIZE) / 2;
-        
+
         const col = Math.floor(canvasX / TILE_SIZE);
         const row = Math.floor(canvasY / TILE_SIZE);
 
         if (col >= 0 && col < NUM_COLS && row >= 0 && row < NUM_ROWS) {
-            
+
             const layerIndex = tilemap.layers.findIndex(l => l.id === selectedSprite.category);
             if (layerIndex === -1) return;
 
             const layer = tilemap.layers[layerIndex];
-            
+
             const alreadyExists = layer.sprites.some(sprite =>
                 sprite.x === col &&
                 sprite.y === row &&
@@ -251,7 +257,7 @@ export function TilemapCanvas() {
                 layers: updatedLayers
             }));
         }
-        else{
+        else {
             setSelectedLayerSprite(null)
         }
     };
@@ -271,7 +277,7 @@ export function TilemapCanvas() {
 
             const canvasX = (mouseX - canvas.width / 2 - offset.x) / scale + (NUM_COLS * TILE_SIZE) / 2;
             const canvasY = (mouseY - canvas.height / 2 - offset.y) / scale + (NUM_ROWS * TILE_SIZE) / 2;
-            
+
             const col = Math.floor(canvasX / TILE_SIZE);
             const row = Math.floor(canvasY / TILE_SIZE);
 
@@ -280,8 +286,8 @@ export function TilemapCanvas() {
             for (const sprite of layer.sprites) {
                 if (sprite.children) {
                     const found = sprite.children.find(child => child.x === col && child.y === row);
-                    if(found){
-                        setSelectedLayerSprite({...sprite})
+                    if (found) {
+                        setSelectedLayerSprite({ ...sprite })
                     }
                 }
             }
@@ -291,7 +297,7 @@ export function TilemapCanvas() {
     const handleMouseMove = (e) => {
         updateHoverCell(e);
 
-        if (isDrawing) addSpriteAt(e); 
+        if (isDrawing) addSpriteAt(e);
     };
 
     const handleMouseUp = () => {
@@ -320,7 +326,7 @@ export function TilemapCanvas() {
 
         if (col >= 0 && col < NUM_COLS && row >= 0 && row < NUM_ROWS) {
             setHoverCell({ row, col });
-        } 
+        }
         else {
             setHoverCell(null);
         }
@@ -359,11 +365,11 @@ export function TilemapCanvas() {
             if (layer.id !== category) return layer;
 
             const updatedSprites = layer.sprites.map(sprite => {
-                
+
                 if (sprite.x === x && sprite.y === y) {
-                    
+
                     const availableRotationKeys = Object.keys(sprite.rotations);
-                    
+
                     if (availableRotationKeys.length <= 1) {
                         return sprite;
                     }
@@ -371,21 +377,21 @@ export function TilemapCanvas() {
                     const availableRotations = availableRotationKeys.map(Number).sort((a, b) => a - b);
 
                     const currentRotation = sprite.rotation || 0;
-                    
+
                     const currentIndex = availableRotations.indexOf(currentRotation);
 
                     const nextIndex = (currentIndex + 1) % availableRotations.length;
 
                     const newRotation = availableRotations[nextIndex];
-                    
+
                     const rotationData = sprite.rotations[newRotation];
 
                     const newLayout = rotationData.layout;
-                    
+
                     const newRows = newLayout.length;
                     const newCols = newLayout[0].length;
                     const newSize = [newCols, newRows];
-                    
+
                     const newChildren = [];
                     for (let r = 0; r < newRows; r++) {
                         for (let c = 0; c < newCols; c++) {
@@ -441,7 +447,7 @@ export function TilemapCanvas() {
         const updatedLayers = tilemap.layers.map(layer => {
             if (layer.id !== category) return layer;
 
-            const updatedSprites = layer.sprites.filter(sprite => 
+            const updatedSprites = layer.sprites.filter(sprite =>
                 !(sprite.x === x && sprite.y === y)
             );
 
@@ -459,58 +465,58 @@ export function TilemapCanvas() {
     return (
         <div className={styles.container}>
             <canvas
-            ref={canvasRef}
-            onMouseDown={handleMouseDown}
-            onMouseUp={handleMouseUp}
-            onMouseMove={handleMouseMove}
-            onMouseLeave={handleMouseLeave}
-            onContextMenu={(e) => e.preventDefault()}
-            className={styles.canvas}
+                ref={canvasRef}
+                onMouseDown={handleMouseDown}
+                onMouseUp={handleMouseUp}
+                onMouseMove={handleMouseMove}
+                onMouseLeave={handleMouseLeave}
+                onContextMenu={(e) => e.preventDefault()}
+                className={styles.canvas}
             />
-            
+
             {selectedLayerSprite && (
-            (() => {
-                const [spriteCols = 1] = selectedLayerSprite.size || [];
+                (() => {
+                    const [spriteCols = 1] = selectedLayerSprite.size || [];
 
-                const leftPosition = getButtonPositionX(selectedLayerSprite.x);
+                    const leftPosition = getButtonPositionX(selectedLayerSprite.x);
 
-                const rightPosition = getButtonPositionX(selectedLayerSprite.x + spriteCols);
-                
-                const topPosition = getButtonPositionY(selectedLayerSprite.y);
+                    const rightPosition = getButtonPositionX(selectedLayerSprite.x + spriteCols);
 
-                return (
-                    <>
-                        <button
-                            style={{
-                                position: 'absolute',
-                                top: topPosition,
-                                left: leftPosition,
-                                zIndex: 10,
-                                transform: 'translate(-60%, -90%)', 
-                            }}
-                            className={styles.rotateButton}
-                            onClick={handleRotateTile}
-                        >
-                            <FaArrowsRotate />
-                        </button>
+                    const topPosition = getButtonPositionY(selectedLayerSprite.y);
 
-                        <button
-                            style={{
-                                position: 'absolute',
-                                top: topPosition,
-                                left: rightPosition,
-                                zIndex: 10,
-                                transform: 'translate(-40%, -90%)',
-                            }}
-                            className={styles.rotateButton}
-                            onClick={handleDeleteTile}
-                        >
-                            <FaTrash />
-                        </button>
-                    </>
-                );
-            })()
-        )}
+                    return (
+                        <>
+                            <button
+                                style={{
+                                    position: 'absolute',
+                                    top: topPosition,
+                                    left: leftPosition,
+                                    zIndex: 10,
+                                    transform: 'translate(-60%, -90%)',
+                                }}
+                                className={styles.rotateButton}
+                                onClick={handleRotateTile}
+                            >
+                                <FaArrowsRotate />
+                            </button>
+
+                            <button
+                                style={{
+                                    position: 'absolute',
+                                    top: topPosition,
+                                    left: rightPosition,
+                                    zIndex: 10,
+                                    transform: 'translate(-40%, -90%)',
+                                }}
+                                className={styles.rotateButton}
+                                onClick={handleDeleteTile}
+                            >
+                                <FaTrash />
+                            </button>
+                        </>
+                    );
+                })()
+            )}
 
             <AccessibleGridOverlay
                 rows={NUM_ROWS}
