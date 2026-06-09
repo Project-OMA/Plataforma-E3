@@ -6,9 +6,11 @@ import { LayerItem } from '../LayerItem';
 import { Sidebar } from '../Sidebar';
 import { LuClipboardList } from 'react-icons/lu';
 import { useTranslation } from 'react-i18next';
+import { useState } from 'react';
+import { RiInformationLine, RiInformationOffLine } from "react-icons/ri";
 
 export function LayerList() {
-    const {t} = useTranslation();
+    const { t } = useTranslation();
 
     const { tilemap, isElementsOpen, setIsElementsOpen, setIsMenuOpen, displacementSidebarMenu, selectedLayer, setSelectedLayer } = useTileMap();
 
@@ -19,13 +21,36 @@ export function LayerList() {
     const handleElementsOpen = () => { setIsElementsOpen(!isElementsOpen); }
 
     useEffect(() => {
-        if(isElementsOpen) setIsMenuOpen(false);
+        if (isElementsOpen) setIsMenuOpen(false);
     }, [isElementsOpen])
+
+    const [hintsEnabled, setHintsEnabled] = useState(true);
+
+    const handleHintsClick = () => {
+        setHintsEnabled(prev => {
+            const next = !prev;
+            return next;
+        });
+    };
+
 
     return (
         <Sidebar
             title={t('map_elements')}
-            icon={<LuClipboardList/>}
+            icon={<LuClipboardList />}
+            headerAction={
+                <button
+                    type="button"
+                    onClick={handleHintsClick}
+                    className={styles.hintsButton}
+                    aria-label="Ativar ou desativar dicas"
+                >
+                    {hintsEnabled
+                        ? <RiInformationLine />
+                        : <RiInformationOffLine />
+                    }
+                </button>
+            }
             borderTopRightRadiusButton={15}
             borderBottomRightRadiusButton={15}
             borderBottomRightRadiusBody={15}
@@ -45,7 +70,7 @@ export function LayerList() {
                             isOpen={selectedLayer == layer.id}
                             toggleLayer={() => toggleLayer(layer.id)}
                         />
-                ))}
+                    ))}
             </ul>
         </Sidebar>
     )
