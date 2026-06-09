@@ -8,6 +8,7 @@ import { LuClipboardList } from 'react-icons/lu';
 import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
 import { RiInformationLine, RiInformationOffLine } from "react-icons/ri";
+import { Tooltip } from '../Tooltip';
 
 export function LayerList() {
     const { t } = useTranslation();
@@ -33,45 +34,81 @@ export function LayerList() {
         });
     };
 
+    const defaultTooltip = {
+        text: '',
+        visible: false,
+        x: 0,
+        y: 0
+    };
+
+    const [tooltip, setTooltip] = useState(defaultTooltip);
+
+    const handleHintsButtonMouseMove = (e) => {
+        setTooltip({
+            text: "Ativa ou desativa as dicas dos botões",
+            visible: true,
+            x: e.clientX,
+            y: e.clientY
+        });
+    };
+
+    const handleHintsButtonMouseLeave = () => {
+        setTooltip(defaultTooltip);
+    };
+
 
     return (
-        <Sidebar
-            title={t('map_elements')}
-            icon={<LuClipboardList />}
-            headerAction={
-                <button
-                    type="button"
-                    onClick={handleHintsClick}
-                    className={styles.hintsButton}
-                    aria-label="Ativar ou desativar dicas"
-                >
-                    {hintsEnabled
-                        ? <RiInformationLine />
-                        : <RiInformationOffLine />
-                    }
-                </button>
-            }
-            borderTopRightRadiusButton={15}
-            borderBottomRightRadiusButton={15}
-            borderBottomRightRadiusBody={15}
-            positionTop={95}
-            active={isElementsOpen}
-            toggleSidebar={isElementsOpen}
-            onClick={handleElementsOpen}
-            positionRight={displacementSidebarMenu}
-        >
-            <ul className={styles.layerList}>
-                {tilemap.layers
-                    .filter(layer => layer.sprites.length > 0)
-                    .map(layer => (
-                        <LayerItem
-                            key={layer.id}
-                            layer={layer}
-                            isOpen={selectedLayer == layer.id}
-                            toggleLayer={() => toggleLayer(layer.id)}
-                        />
-                    ))}
-            </ul>
-        </Sidebar>
+        <>
+            <Sidebar
+                title={t('map_elements')}
+                icon={<LuClipboardList />}
+                headerAction={
+                    <button
+                        type="button"
+                        onClick={handleHintsClick}
+                        onMouseMove={handleHintsButtonMouseMove}
+                        onMouseLeave={handleHintsButtonMouseLeave}
+                        className={styles.hintsButton}
+                        aria-label="Ativar ou desativar dicas"
+                    >
+                        {hintsEnabled
+                            ? <RiInformationLine />
+                            : <RiInformationOffLine />
+                        }
+                    </button>
+                }
+                borderTopRightRadiusButton={15}
+                borderBottomRightRadiusButton={15}
+                borderBottomRightRadiusBody={15}
+                positionTop={95}
+                active={isElementsOpen}
+                toggleSidebar={isElementsOpen}
+                onClick={handleElementsOpen}
+                positionRight={displacementSidebarMenu}
+            >
+                <ul className={styles.layerList}>
+                    {tilemap.layers
+                        .filter(layer => layer.sprites.length > 0)
+                        .map(layer => (
+                            <LayerItem
+                                key={layer.id}
+                                layer={layer}
+                                isOpen={selectedLayer == layer.id}
+                                toggleLayer={() => toggleLayer(layer.id)}
+                                hintsEnabled={hintsEnabled}
+                            />
+                        ))}
+                </ul>
+            </Sidebar>
+
+            {tooltip.visible && (
+                <Tooltip
+                    text={tooltip.text}
+                    x={tooltip.x}
+                    y={tooltip.y}
+                />
+            )}
+        </>
     )
+
 }

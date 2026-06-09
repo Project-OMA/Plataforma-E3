@@ -8,9 +8,9 @@ import { useTileMap } from "../../contexts/TileMapContext";
 import { SubLayerList } from '../SubLayerList';
 import { useTranslation } from 'react-i18next';
 
-export function LayerItem({ layer, isOpen, toggleLayer }) {
+export function LayerItem({ layer, isOpen, toggleLayer, hintsEnabled }) {
 
-    const {t} = useTranslation();
+    const { t } = useTranslation();
 
     const { setTilemap } = useTileMap();
 
@@ -30,7 +30,7 @@ export function LayerItem({ layer, isOpen, toggleLayer }) {
 
     const isLayerVisible = layer.sprites.some(sprite => sprite.visible);
 
-    return(
+    return (
         <li>
             <div className={`${styles.layerItem} ${isOpen ? styles.activated : styles.deactivate}`}>
                 <div
@@ -54,8 +54,8 @@ export function LayerItem({ layer, isOpen, toggleLayer }) {
                     </button>
                 </div>
             </div>
-   
-            {isOpen && <SubLayerList layer={layer} />}
+
+            {isOpen && <SubLayerList layer={layer} hintsEnabled={hintsEnabled} />}
         </li>
     )
 }

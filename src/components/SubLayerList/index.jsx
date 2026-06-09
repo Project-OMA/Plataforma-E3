@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { SubLayerItem } from '../SubLayerItem';
 
-export function SubLayerList({ layer }) {
+export function SubLayerList({ layer, hintsEnabled }) {
 
     const [openSubLayers, setOpenSubLayers] = useState({});
 
@@ -18,7 +18,7 @@ export function SubLayerList({ layer }) {
         setOpenSubLayers(prev => ({ ...prev, [key]: !prev[key] }));
     };
 
-    return(
+    return (
         <ul className={styles.sublayerList}>
             {Object.entries(groupedSprites).map(([name, sprites]) => {
                 const key = `${layer.id}-${name}`;
@@ -30,6 +30,7 @@ export function SubLayerList({ layer }) {
                         sprites={sprites}
                         isOpen={openSubLayers[key]}
                         toggleSubLayer={() => toggleSubLayer(key)}
+                        hintsEnabled={hintsEnabled}
                     />
                 );
             })}
