@@ -52,14 +52,6 @@ export function adaptarAppJsonParaE3Map(appJson) {
                     }))
                 });
             }
-
-            if (sprite.translate === "piano") {
-                console.log({
-                    spriteX: sprite.x,
-                    spriteY: sprite.y,
-                    children: sprite.children
-                });
-            }
         }
     }
 

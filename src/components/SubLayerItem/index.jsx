@@ -7,9 +7,9 @@ import { FaTrash } from 'react-icons/fa';
 import { SpriteList } from '../SpriteList';
 import { useTranslation } from 'react-i18next';
 
-export function SubLayerItem({ layerId, name, sprites, isOpen, toggleSubLayer }) {
+export function SubLayerItem({ layerId, name, sprites, isOpen, toggleSubLayer, hintsEnabled }) {
 
-    const {t} = useTranslation();
+    const { t } = useTranslation();
 
     const { setTilemap } = useTileMap();
 
@@ -45,7 +45,7 @@ export function SubLayerItem({ layerId, name, sprites, isOpen, toggleSubLayer })
 
     const isGroupVisible = sprites.some(sprite => sprite.visible);
 
-    return(
+    return (
         <li>
             <div className={`${styles.subLayer} ${isOpen ? styles.subactivated : styles.subdeactivate}`}>
                 <div onClick={toggleSubLayer} className={styles.subLayerName} tabIndex={0}>
@@ -55,20 +55,20 @@ export function SubLayerItem({ layerId, name, sprites, isOpen, toggleSubLayer })
 
                 <div className={styles.subLayerButtons}>
                     <button onClick={toggleVisibleTileGroup} className={styles.subLayerButton} aria-label="Visualizar">
-                        {isGroupVisible ? <IoMdEye/> : <IoMdEyeOff/>}
+                        {isGroupVisible ? <IoMdEye /> : <IoMdEyeOff />}
                     </button>
 
                     <button onClick={handleDeleteGroup} className={styles.subLayerButton} aria-label="Deletar grupo de layer">
-                        <FaTrash/>
+                        <FaTrash />
                     </button>
 
                     <button onClick={toggleSubLayer} className={styles.subLayerButton} aria-label="Expandir grupo de layer">
-                        {isOpen ? <BiSolidDownArrow/> : <BiSolidLeftArrow/>}
+                        {isOpen ? <BiSolidDownArrow /> : <BiSolidLeftArrow />}
                     </button>
                 </div>
             </div>
 
-            {isOpen && <SpriteList sprites={sprites} layerId={layerId} />}
+            {isOpen && <SpriteList sprites={sprites} layerId={layerId} hintsEnabled={hintsEnabled}/>}
         </li>
     )
 }

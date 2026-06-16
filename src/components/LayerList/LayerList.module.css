@@ -203,3 +203,16 @@
     outline: 2px solid #1976d2;
     outline-offset: 2px;
 }
+
+.hintsButton {
+    background: transparent;
+    border: none;
+    margin-left: 3px;
+    cursor: pointer;
+    display: flex;
+}
+
+.hintsButton svg {
+    color: white;
+    font-size: 25px;
+}

@@ -6,10 +6,11 @@ import { SidebarHeader } from '../SidebarHeader'
 import { useEffect, useRef } from 'react';
 
 export function Sidebar({
-    children, 
-    icon, 
-    title, 
-    horizontalAlignment = "top", 
+    children,
+    icon,
+    title,
+    headerAction,
+    horizontalAlignment = "top",
     verticalAlignment = "right",
     borderTopLeftRadiusButton = 0,
     borderTopRightRadiusButton = 0,
@@ -27,7 +28,7 @@ export function Sidebar({
     onClick,
     setDisplacementSidebar,
     active = false
-}){
+}) {
     const contentRef = useRef(null);
     useEffect(() => {
         if (contentRef.current && typeof setDisplacementSidebar === 'function') {
@@ -36,8 +37,8 @@ export function Sidebar({
         }
     }, [toggleSidebar]);
 
-    return(
-        <div 
+    return (
+        <div
             className={styles.container}
             style={{
                 flexDirection: `${verticalAlignment == 'right' ? 'row' : 'row-reverse'}`,
@@ -47,16 +48,19 @@ export function Sidebar({
                 ...(positionRight != null && { left: `${positionRight}px` }),
             }}
         >
-            
-            <div 
+
+            <div
                 ref={contentRef}
                 className={styles.content}
                 style={{
-                    flexDirection: `${horizontalAlignment == 'top' ? 'column': 'column-reverse'}`,
+                    flexDirection: `${horizontalAlignment == 'top' ? 'column' : 'column-reverse'}`,
                     display: `${toggleSidebar ? '' : 'none'}`
                 }}
             >
-                <SidebarHeader title={title}/>
+                <SidebarHeader
+                    title={title}
+                    headerAction={headerAction}
+                />
                 <SidebarBody
                     borderTopLeftRadius={borderTopLeftRadiusBody}
                     borderTopRightRadius={borderTopRightRadiusBody}
@@ -68,13 +72,13 @@ export function Sidebar({
                 </SidebarBody>
             </div>
 
-            <Button 
+            <Button
                 info={title}
                 borderTopLeftRadius={borderTopLeftRadiusButton}
                 borderTopRightRadius={borderTopRightRadiusButton}
                 borderBottomRightRadius={borderBottomRightRadiusButton}
                 borderBottomLeftRadius={borderBottomLeftRadiusButton}
-                style={{alignSelf:`${horizontalAlignment == 'top' ? 'start': 'end'}`}}
+                style={{ alignSelf: `${horizontalAlignment == 'top' ? 'start' : 'end'}` }}
                 onClick={onClick}
                 active={active}
             >

@@ -61,7 +61,6 @@ export function Menu(){
             fileString = JSON.stringify(map)
         }
         else{
-            console.log('SALVANDO EM XML');
             fileString = converterJsonParaXml(tilemap);
         }
         setModal(false)
@@ -125,7 +124,7 @@ export function Menu(){
                         break;
 
                     default:
-                        console.log("Extensão não suportada");
+                        console.warn("Extensão não suportada");
                         break;
                 }
             };
