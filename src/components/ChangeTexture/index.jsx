@@ -19,7 +19,6 @@ export function ChangeTexture({isOpen = false, handleOpen}){
 
     function handleSpriteChange(e) {
         const spriteName = e.target.value;
-        console.log(spriteName)
         const spriteObj = selectedLayer?.sprites.find(s => s.name === spriteName);
         setSelectedSprite(spriteObj);
     }
