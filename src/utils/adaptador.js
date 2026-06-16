@@ -4,6 +4,7 @@ export function adaptarAppJsonParaE3Map(appJson) {
     const VOID_ID = "-1";
 
     const tamanhoEmPixels = [width * tileSize, height * tileSize];
+    const programmableSprites = [];
 
     const layerNameMapping = {
         floor: 'floor',
@@ -17,17 +18,17 @@ export function adaptarAppJsonParaE3Map(appJson) {
     };
 
     const grids = {};
-    
+
     for (const key in layerNameMapping) {
         const e3mapLayerName = layerNameMapping[key];
         grids[e3mapLayerName] = Array(height).fill(0).map(() => Array(width).fill(VOID_ID));
     }
 
     for (const layer of layers) {
-        
+
         const targetGridName = layerNameMapping[layer.id];
         if (!targetGridName) continue;
-        
+
         const targetGrid = grids[targetGridName];
 
         for (const sprite of layer.sprites) {
@@ -41,6 +42,24 @@ export function adaptarAppJsonParaE3Map(appJson) {
                     }
                 }
             }
+
+            if (sprite.programmable) {
+                programmableSprites.push({
+                    layer: targetGridName,
+                    cells: sprite.children.map(child => ({
+                        x: child.x,
+                        y: child.y
+                    }))
+                });
+            }
+
+            if (sprite.translate === "piano") {
+                console.log({
+                    spriteX: sprite.x,
+                    spriteY: sprite.y,
+                    children: sprite.children
+                });
+            }
         }
     }
 
@@ -53,6 +72,7 @@ export function adaptarAppJsonParaE3Map(appJson) {
         utensils: grids.utensils,
         eletronics: grids.eletronics,
         interactive_elements: grids.interactive_elements,
-        persons: grids.persons
+        persons: grids.persons,
+        programmableSprites: programmableSprites
     };
 }

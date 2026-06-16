@@ -4,11 +4,12 @@ import { useTileMap } from "../../contexts/TileMapContext";
 
 import { FaTrash } from 'react-icons/fa';
 import { IoMdEye, IoMdEyeOff } from 'react-icons/io';
+import { IoCodeSharp, IoCodeSlash } from "react-icons/io5";
 import { useTranslation } from 'react-i18next';
 
 export function SpriteItem({ sprite, layerId }) {
 
-    const {t} = useTranslation();
+    const { t } = useTranslation();
 
     const { setTilemap, setSelectedLayerSprite } = useTileMap();
 
@@ -22,8 +23,8 @@ export function SpriteItem({ sprite, layerId }) {
                     ...layer,
                     sprites: layer.sprites.map(s =>
                         s.x === sprite.x && s.y === sprite.y
-                        ? { ...s, visible: !s.visible }
-                        : s
+                            ? { ...s, visible: !s.visible }
+                            : s
                     ),
                 };
             }),
@@ -43,11 +44,29 @@ export function SpriteItem({ sprite, layerId }) {
         }));
     };
 
+    const toggleProgrammableTile = () => {
+        setTilemap(prev => ({
+            ...prev,
+            layers: prev.layers.map(layer => {
+                if (layer.id !== layerId) return layer;
+
+                return {
+                    ...layer,
+                    sprites: layer.sprites.map(s =>
+                        s.x === sprite.x && s.y === sprite.y
+                            ? { ...s, programmable: !s.programmable }
+                            : s
+                    ),
+                };
+            }),
+        }));
+    };
+
     const handleSpriteClick = () => {
         setSelectedLayerSprite({ ...sprite, category: layerId });
     };
 
-    return(
+    return (
         <div className={styles.subLayerTile}>
             <div onClick={handleSpriteClick} className={styles.subLayerTileName} tabIndex={0}>
                 <label>{t(sprite.translate)}</label>
@@ -55,10 +74,20 @@ export function SpriteItem({ sprite, layerId }) {
             </div>
             <div>
                 <button onClick={toggleVisibleTile} className={styles.subLayerTileButtons} aria-label="visualizar tile">
-                    {sprite.visible ? <IoMdEye/> : <IoMdEyeOff/>}
+                    {sprite.visible ? <IoMdEye /> : <IoMdEyeOff />}
                 </button>
                 <button onClick={removeTile} className={styles.subLayerTileButtons} aria-label="Deletar tile">
-                    <FaTrash/>
+                    <FaTrash />
+                </button>
+                <button
+                    onClick={toggleProgrammableTile}
+                    className={styles.subLayerTileButtons}
+                    aria-label="Marcar como programável"
+                >
+                    {sprite.programmable
+                        ? <IoCodeSharp />
+                        : <IoCodeSlash />
+                    }
                 </button>
             </div>
         </div>
