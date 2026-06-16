@@ -86,8 +86,8 @@ export function TileMapProvider({ children }) {
         tilemap, 
         setTilemap
     ] = useState({
-        width: 5,
-        height: 5,
+        width: 48,
+        height: 27,
         tileSize: 32,
         spriteSheetPath: '',
         layers: [

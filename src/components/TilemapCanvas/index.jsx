@@ -26,7 +26,7 @@ export function TilemapCanvas() {
 
     const canvasRef = useRef(null);
     const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
-    const [scale, setScale] = useState(1);
+    const [scale, setScale] = useState(0.7);
     const [offset, setOffset] = useState({ x: 0, y: 0 });
     const [isDrawing, setIsDrawing] = useState(false);
 
