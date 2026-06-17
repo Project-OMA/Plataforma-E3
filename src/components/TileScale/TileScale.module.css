@@ -1,0 +1,13 @@
+.container {
+    position: absolute;
+    transform: translateX(-50%);
+    z-index: 2;
+    pointer-events: none;
+}
+
+.image {
+    display: block;
+    width: clamp(180px, 12vw, 260px);
+    height: auto;
+    user-select: none;
+}

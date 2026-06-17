@@ -7,6 +7,7 @@ import { useSpriteSheetMap } from '../../hook/useSpriteSheetMap';
 import { AccessibleGridOverlay } from '../AccessibleGridOverlay';
 import { spritesMap } from '../../SpritesMap';
 import { FaArrowsRotate, FaTrash } from "react-icons/fa6";
+import { TileScale } from '../TileScale';
 
 export function TilemapCanvas() {
     const spriteSheetMap = useSpriteSheetMap(spritesMap);
@@ -29,6 +30,11 @@ export function TilemapCanvas() {
     const [scale, setScale] = useState(0.7);
     const [offset, setOffset] = useState({ x: 0, y: 0 });
     const [isDrawing, setIsDrawing] = useState(false);
+    
+    const tileScaleStyle = {
+        left: `${canvasSize.width / 2 + offset.x}px`,
+        top: `${canvasSize.height / 2 + offset.y + (NUM_ROWS * TILE_SIZE * scale) / 2 + 8}px`
+    };
 
     function drawTilemap(ctx, tilemap, gridSize) {
         if (!ctx) return;
@@ -473,6 +479,8 @@ export function TilemapCanvas() {
                 onContextMenu={(e) => e.preventDefault()}
                 className={styles.canvas}
             />
+
+            <TileScale style={tileScaleStyle} />
 
             {selectedLayerSprite && (
                 (() => {
