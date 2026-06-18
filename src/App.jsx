@@ -12,31 +12,33 @@ import { Banners } from './components/Banners';
 import { TilemapCanvas } from './components/TilemapCanvas';
 import { Category } from './components/Category';
 import { Undo } from './components/Undo';
+import { TileEraser } from './components/TileEraser'
 import { LayerList } from './components/LayerList';
 import { View3D } from './components/View3D';
 
 export function App() {
     const [error, setError] = useState(null);
     const [isInitialized, setIsInitialized] = useState(false);
-    
+
     useEffect(() => {
         initializeTileData()
-        .then(() => setIsInitialized(true))
-        .catch(setError);
+            .then(() => setIsInitialized(true))
+            .catch(setError);
     }, []);
 
     return (
         <TileMapProvider>
-            <TilemapCanvas/>
-            <Category/>
-            <Menu/>
-            <LayerList/>
-            <Attributes/>
-            <Banners/>
-            <ViewLayers/>
-            <View3D/>
-            <Configuration/>
-            <Undo/>
+            <TilemapCanvas />
+            <Category />
+            <Menu />
+            <LayerList />
+            <Attributes />
+            <Banners />
+            <ViewLayers />
+            <View3D />
+            <Configuration />
+            <Undo />
+            <TileEraser />
         </TileMapProvider>
     );
 }

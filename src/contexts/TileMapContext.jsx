@@ -1,89 +1,89 @@
-import { 
-    createContext, 
-    useContext, 
-    useState 
+import {
+    createContext,
+    useContext,
+    useState
 } from 'react';
 
 const TileMapContext = createContext();
 
 export function TileMapProvider({ children }) {
     const [
-        isMenuOpen, 
+        isMenuOpen,
         setIsMenuOpen
     ] = useState(false);
 
     const [
-        isElementsOpen, 
+        isElementsOpen,
         setIsElementsOpen
     ] = useState(false);
 
     const [
-        isAttributesOpen, 
+        isAttributesOpen,
         setIsAttributesOpen
     ] = useState(false);
 
     const [
-        isHelpOpen, 
+        isHelpOpen,
         setIsHelpOpen
     ] = useState(false);
 
     const [
-        isDisplayOpen, 
+        isDisplayOpen,
         setIsDisplayOpen
     ] = useState(false);
 
     const [
-        displacementSidebarMenu, 
+        displacementSidebarMenu,
         setDisplacementSidebarMenu
     ] = useState(0);
 
     const [
-        displacementSidebarHelp, 
+        displacementSidebarHelp,
         setDisplacementSidebarHelp
     ] = useState(0);
 
     const [
-        displacementSidebarDisplay, 
+        displacementSidebarDisplay,
         setDisplacementSidebarDisplay
     ] = useState(0);
 
     const [
-        selectedCategory, 
+        selectedCategory,
         setSelectedCategory
     ] = useState(null);
 
     const [
-        selectedSprite, 
+        selectedSprite,
         setSelectedSprite
     ] = useState({});
 
     const [
-        selectedLayerSprite, 
+        selectedLayerSprite,
         setSelectedLayerSprite
     ] = useState(null);
 
     const [
-        selectedLayer, 
+        selectedLayer,
         setSelectedLayer
     ] = useState(null);
 
     const [
-        history, 
+        history,
         setHistory
     ] = useState([]);
 
     const [
-        settingsOpen, 
+        settingsOpen,
         setSettingsOpen
     ] = useState(false);
 
     const [
-        hoverCell, 
+        hoverCell,
         setHoverCell
     ] = useState(null);
 
     const [
-        tilemap, 
+        tilemap,
         setTilemap
     ] = useState({
         width: 48,
@@ -91,92 +91,96 @@ export function TileMapProvider({ children }) {
         tileSize: 32,
         spriteSheetPath: '',
         layers: [
-            { 
-                id: 'floor', 
-                name: 'Pisos', 
-                visible: true, 
-                sprites: [] 
+            {
+                id: 'floor',
+                name: 'Pisos',
+                visible: true,
+                sprites: []
             },
-            { 
-                id: 'walls', 
-                name: 'Paredes', 
-                visible: true, 
-                sprites: [] 
+            {
+                id: 'walls',
+                name: 'Paredes',
+                visible: true,
+                sprites: []
             },
-            { 
-                id: 'door_and_windows', 
-                name: 'Portas e Janelas', 
-                visible: true, 
-                sprites: [] 
+            {
+                id: 'door_and_windows',
+                name: 'Portas e Janelas',
+                visible: true,
+                sprites: []
             },
-            { 
-                id: 'furniture', 
+            {
+                id: 'furniture',
                 name: 'Móveis',
-                visible: true, 
-                sprites: [] 
+                visible: true,
+                sprites: []
             },
-            { 
-                id: 'utensils', 
-                name: 'Utensílios', 
-                visible: true, 
-                sprites: [] 
+            {
+                id: 'utensils',
+                name: 'Utensílios',
+                visible: true,
+                sprites: []
             },
-            { 
-                id: 'eletronics', 
-                name: 'Eletrodomésticos', 
-                visible: true, 
-                sprites: [] 
+            {
+                id: 'eletronics',
+                name: 'Eletrodomésticos',
+                visible: true,
+                sprites: []
             },
-            { 
-                id: 'interactive_elements', 
-                name: 'Elementos Interativos', 
-                visible: true, 
-                sprites: [] 
+            {
+                id: 'interactive_elements',
+                name: 'Elementos Interativos',
+                visible: true,
+                sprites: []
             },
-            { 
-                id: 'persons', 
-                name: 'Pessoa', 
-                visible: true, 
-                sprites: [] 
+            {
+                id: 'persons',
+                name: 'Pessoa',
+                visible: true,
+                sprites: []
             },
         ],
     });
 
+    const [activeTool, setActiveTool] = useState('default');
+
     return (
-        <TileMapContext.Provider value = {
+        <TileMapContext.Provider value={
             {
-                isMenuOpen, 
+                isMenuOpen,
                 setIsMenuOpen,
-                isElementsOpen, 
+                isElementsOpen,
                 setIsElementsOpen,
-                isAttributesOpen, 
+                isAttributesOpen,
                 setIsAttributesOpen,
-                isHelpOpen, 
+                isHelpOpen,
                 setIsHelpOpen,
-                isDisplayOpen, 
+                isDisplayOpen,
                 setIsDisplayOpen,
-                displacementSidebarMenu, 
+                displacementSidebarMenu,
                 setDisplacementSidebarMenu,
-                displacementSidebarDisplay, 
+                displacementSidebarDisplay,
                 setDisplacementSidebarDisplay,
-                displacementSidebarHelp, 
+                displacementSidebarHelp,
                 setDisplacementSidebarHelp,
-                selectedCategory, 
+                selectedCategory,
                 setSelectedCategory,
-                selectedSprite, 
+                selectedSprite,
                 setSelectedSprite,
-                selectedLayer, 
+                selectedLayer,
                 setSelectedLayer,
-                selectedLayerSprite, 
+                selectedLayerSprite,
                 setSelectedLayerSprite,
-                settingsOpen, 
+                settingsOpen,
                 setSettingsOpen,
-                hoverCell, 
+                hoverCell,
                 setHoverCell,
-                history, 
+                history,
                 setHistory,
-                tilemap, 
+                tilemap,
                 setTilemap,
+                activeTool,
+                setActiveTool,
             }
         }>
             {children}

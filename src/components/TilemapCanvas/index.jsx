@@ -18,7 +18,8 @@ export function TilemapCanvas() {
         selectedLayerSprite, setSelectedLayerSprite,
         setHistory,
         hoverCell, setHoverCell,
-        selectedLayer, setSelectedLayer
+        selectedLayer, setSelectedLayer,
+        activeTool
     } = useTileMap();
 
     const TILE_SIZE = tilemap.tileSize;
@@ -30,7 +31,8 @@ export function TilemapCanvas() {
     const [scale, setScale] = useState(0.7);
     const [offset, setOffset] = useState({ x: 0, y: 0 });
     const [isDrawing, setIsDrawing] = useState(false);
-    
+    const [eraseSelection, setEraseSelection] = useState(null);
+
     const tileScaleStyle = {
         left: `${canvasSize.width / 2 + offset.x}px`,
         top: `${canvasSize.height / 2 + offset.y + (NUM_ROWS * TILE_SIZE * scale) / 2 + 8}px`
@@ -126,26 +128,57 @@ export function TilemapCanvas() {
 
         if (hoverCell) {
 
-            const [spriteCols = 1, spriteRows = 1] = selectedSprite.size || [];
+            const [spriteCols = 1, spriteRows = 1] =
+                activeTool === 'eraser'
+                    ? [1, 1]
+                    : selectedSprite.size || [];
 
-            const hoverImage = spriteSheetMap[selectedSprite.path];
-            if (hoverImage) {
-                ctx.save();
-                ctx.globalAlpha = 0.7;
-                ctx.drawImage(
-                    hoverImage,
-                    hoverCell.col * TILE_SIZE,
-                    hoverCell.row * TILE_SIZE,
-                    TILE_SIZE * spriteCols,
-                    TILE_SIZE * spriteRows
-                );
-                ctx.restore();
+            if (activeTool !== 'eraser') {
+                const hoverImage = spriteSheetMap[selectedSprite.path];
+
+                if (hoverImage) {
+                    ctx.save();
+                    ctx.globalAlpha = 0.7;
+                    ctx.drawImage(
+                        hoverImage,
+                        hoverCell.col * TILE_SIZE,
+                        hoverCell.row * TILE_SIZE,
+                        TILE_SIZE * spriteCols,
+                        TILE_SIZE * spriteRows
+                    );
+                    ctx.restore();
+                }
             }
+
             ctx.save();
             ctx.strokeStyle = 'rgba(1, 159, 206, 1)';
             ctx.lineWidth = 2;
-            ctx.strokeRect(hoverCell.col * TILE_SIZE, hoverCell.row * TILE_SIZE, TILE_SIZE * spriteCols, TILE_SIZE * spriteRows);
+            ctx.strokeRect(
+                hoverCell.col * TILE_SIZE,
+                hoverCell.row * TILE_SIZE,
+                TILE_SIZE * spriteCols,
+                TILE_SIZE * spriteRows
+            );
             ctx.restore();
+        }
+
+        if (activeTool === 'eraser' && eraseSelection) {
+            const bounds = getEraseSelectionBounds();
+
+            if (bounds) {
+                const x = bounds.minCol * TILE_SIZE;
+                const y = bounds.minRow * TILE_SIZE;
+                const width = (bounds.maxCol - bounds.minCol + 1) * TILE_SIZE;
+                const height = (bounds.maxRow - bounds.minRow + 1) * TILE_SIZE;
+
+                ctx.save();
+                ctx.fillStyle = 'rgba(1, 159, 206, 0.15)';
+                ctx.strokeStyle = 'rgba(1, 159, 206, 1)';
+                ctx.lineWidth = 2;
+                ctx.fillRect(x, y, width, height);
+                ctx.strokeRect(x, y, width, height);
+                ctx.restore();
+            }
         }
 
         if (selectedLayerSprite) {
@@ -163,7 +196,7 @@ export function TilemapCanvas() {
             );
             ctx.restore();
         }
-    }, [tilemap, scale, offset, hoverCell, selectedLayerSprite, canvasSize, spriteSheetMap]);
+    }, [tilemap, scale, offset, hoverCell, selectedLayerSprite, canvasSize, spriteSheetMap, activeTool, eraseSelection]);
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -195,6 +228,116 @@ export function TilemapCanvas() {
         canvas.addEventListener("wheel", handleWheel, { passive: false });
         return () => canvas.removeEventListener("wheel", handleWheel);
     }, [scale, offset]);
+
+    useEffect(() => {
+        if (activeTool !== 'eraser' || !eraseSelection) return;
+
+        const handleWindowMouseMove = (e) => {
+            const cell = getCellFromMouseEvent(e);
+
+            if (!cell) return;
+
+            setEraseSelection(prev => {
+                if (!prev) return prev;
+
+                return {
+                    ...prev,
+                    endCol: cell.col,
+                    endRow: cell.row
+                };
+            });
+        };
+
+        const handleWindowMouseUp = () => {
+            eraseSelectedArea();
+            setEraseSelection(null);
+            setIsDrawing(false);
+        };
+
+        window.addEventListener('mousemove', handleWindowMouseMove);
+        window.addEventListener('mouseup', handleWindowMouseUp);
+
+        return () => {
+            window.removeEventListener('mousemove', handleWindowMouseMove);
+            window.removeEventListener('mouseup', handleWindowMouseUp);
+        };
+    }, [activeTool, eraseSelection]);
+
+    const getCellFromMouseEvent = (e) => {
+        const canvas = canvasRef.current;
+        if (!canvas) return null;
+
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+
+        const canvasX = (mouseX - canvas.width / 2 - offset.x) / scale + (NUM_COLS * TILE_SIZE) / 2;
+        const canvasY = (mouseY - canvas.height / 2 - offset.y) / scale + (NUM_ROWS * TILE_SIZE) / 2;
+
+        const col = Math.floor(canvasX / TILE_SIZE);
+        const row = Math.floor(canvasY / TILE_SIZE);
+
+        if (col < 0 || col >= NUM_COLS || row < 0 || row >= NUM_ROWS) {
+            return null;
+        }
+
+        return { col, row };
+    };
+
+    const getEraseSelectionBounds = () => {
+        if (!eraseSelection) return null;
+
+        return {
+            minCol: Math.min(eraseSelection.startCol, eraseSelection.endCol),
+            maxCol: Math.max(eraseSelection.startCol, eraseSelection.endCol),
+            minRow: Math.min(eraseSelection.startRow, eraseSelection.endRow),
+            maxRow: Math.max(eraseSelection.startRow, eraseSelection.endRow)
+        };
+    };
+
+    const spriteIntersectsEraseArea = (sprite, bounds) => {
+        if (sprite.children && sprite.children.length > 0) {
+            return sprite.children.some(child =>
+                child.x >= bounds.minCol &&
+                child.x <= bounds.maxCol &&
+                child.y >= bounds.minRow &&
+                child.y <= bounds.maxRow
+            );
+        }
+
+        return (
+            sprite.x >= bounds.minCol &&
+            sprite.x <= bounds.maxCol &&
+            sprite.y >= bounds.minRow &&
+            sprite.y <= bounds.maxRow
+        );
+    };
+
+    const eraseSelectedArea = () => {
+        const bounds = getEraseSelectionBounds();
+
+        if (!bounds) return;
+
+        const hasSpritesToErase = tilemap.layers.some(layer =>
+            layer.sprites.some(sprite => spriteIntersectsEraseArea(sprite, bounds))
+        );
+
+        if (!hasSpritesToErase) return;
+
+        setHistory(prev => [...prev, structuredClone(tilemap)]);
+
+        setTilemap(prev => ({
+            ...prev,
+            layers: prev.layers.map(layer => ({
+                ...layer,
+                sprites: layer.sprites.filter(sprite =>
+                    !spriteIntersectsEraseArea(sprite, bounds)
+                )
+            }))
+        }));
+
+        setSelectedLayerSprite(null);
+    };
 
     const addSpriteAt = (e) => {
         const canvas = canvasRef.current;
@@ -270,9 +413,28 @@ export function TilemapCanvas() {
 
     const handleMouseDown = (e) => {
         if (e.button === 0) {
+            if (activeTool === 'eraser') {
+                const cell = getCellFromMouseEvent(e);
+
+                if (!cell) return;
+
+                setIsDrawing(false);
+                setSelectedLayerSprite(null);
+
+                setEraseSelection({
+                    startCol: cell.col,
+                    startRow: cell.row,
+                    endCol: cell.col,
+                    endRow: cell.row
+                });
+
+                return;
+            }
+
             setIsDrawing(true);
             addSpriteAt(e);
         }
+
         else if (e.button === 2) {
             const canvas = canvasRef.current;
             if (!canvas || !selectedSprite) return;
@@ -303,16 +465,41 @@ export function TilemapCanvas() {
     const handleMouseMove = (e) => {
         updateHoverCell(e);
 
+        if (activeTool === 'eraser' && eraseSelection) {
+            const cell = getCellFromMouseEvent(e);
+
+            if (cell) {
+                setEraseSelection(prev => ({
+                    ...prev,
+                    endCol: cell.col,
+                    endRow: cell.row
+                }));
+            }
+
+            return;
+        }
+
         if (isDrawing) addSpriteAt(e);
     };
 
     const handleMouseUp = () => {
+        if (activeTool === 'eraser') {
+            eraseSelectedArea();
+            setEraseSelection(null);
+            setIsDrawing(false);
+            return;
+        }
+
         setIsDrawing(false);
     };
 
     const handleMouseLeave = () => {
         setIsDrawing(false);
         setHoverCell(null);
+
+        if (activeTool !== 'eraser') {
+            setEraseSelection(null);
+        }
     };
 
     const updateHoverCell = (e) => {
