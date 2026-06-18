@@ -56,6 +56,8 @@ export function LayerList() {
         setTooltip(defaultTooltip);
     };
 
+    const layersWithSprites = tilemap.layers.filter(layer => layer.sprites.length > 0);
+
 
     return (
         <>
@@ -86,10 +88,9 @@ export function LayerList() {
                 onClick={handleElementsOpen}
                 positionRight={displacementSidebarMenu}
             >
-                <ul className={styles.layerList}>
-                    {tilemap.layers
-                        .filter(layer => layer.sprites.length > 0)
-                        .map(layer => (
+                {layersWithSprites.length > 0 ? (
+                    <ul className={styles.layerList}>
+                        {layersWithSprites.map(layer => (
                             <LayerItem
                                 key={layer.id}
                                 layer={layer}
@@ -98,7 +99,12 @@ export function LayerList() {
                                 hintsEnabled={hintsEnabled}
                             />
                         ))}
-                </ul>
+                    </ul>
+                ) : (
+                    <p className={styles.emptyElementsMessage}>
+                        Nenhum elemento adicionado ao mapa
+                    </p>
+                )}
             </Sidebar>
 
             {tooltip.visible && (
