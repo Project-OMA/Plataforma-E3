@@ -18,14 +18,14 @@ import { converterXmlParaJson } from '../../utils/converterXmlParaJson';
 import { converterJsonParaJson } from '../../utils/converterJsonParaJson';
 import { convertMap } from '../../utils/converter';
 
-export function Menu(){
-    const {t} = useTranslation();
+export function Menu() {
+    const { t } = useTranslation();
 
     const download = (fileFormat, fileString) => {
 
         const type = fileFormat === 'json' ? 'application/json' : 'application/xml'
 
-        const blob = new Blob([fileString], { type: type});
+        const blob = new Blob([fileString], { type: type });
 
         const url = URL.createObjectURL(blob);
 
@@ -45,22 +45,37 @@ export function Menu(){
     const [fileFormat, setFileFormat] = useState('json');
     const [option, setOption] = useState('save');
 
+    const hasPersonOnMap = () => {
+        const personsLayer = tilemap.layers.find(layer => layer.id === 'persons');
+
+        return personsLayer?.sprites?.some(sprite => sprite);
+    };
+
     const openModal = (opt) => {
-        setModal(true)
-        setOption(opt)
-        const title = opt === 'save' ? "Salvar Mapa" : "Novo Mapa"
-        setModalTitle(title)
+        if (opt === 'save' && !hasPersonOnMap()) {
+            setOption('save-warning');
+            setModalTitle("Salvar Mapa");
+            setModal(true);
+            return;
+        }
+
+        setModal(true);
+
+        setOption(opt);
+        const title = opt === 'save' ? "Salvar Mapa" : "Novo Mapa";
+
+        setModalTitle(title);
     }
 
     const save = () => {
         let fileString = ''
-        if(fileFormat == 'json'){
+        if (fileFormat == 'json') {
 
             const e3Map = adaptarAppJsonParaE3Map(tilemap);
             const map = convertMap(e3Map);
             fileString = JSON.stringify(map)
         }
-        else{
+        else {
             fileString = converterJsonParaXml(tilemap);
         }
         setModal(false)
@@ -79,19 +94,19 @@ export function Menu(){
         }
     };
 
-    const { 
+    const {
         tilemap, setTilemap,
-        setSelectedSprite, 
-        setSelectedLayerSprite, 
+        setSelectedSprite,
+        setSelectedLayerSprite,
         setHistory, history,
-        isMenuOpen, setIsMenuOpen, setDisplacementSidebarMenu, 
-        setIsElementsOpen 
+        isMenuOpen, setIsMenuOpen, setDisplacementSidebarMenu,
+        setIsElementsOpen
     } = useTileMap();
 
     const handleMenuOpen = () => { setIsMenuOpen(prev => !prev); }
 
     useEffect(() => {
-        if(isMenuOpen) setIsElementsOpen(false);
+        if (isMenuOpen) setIsElementsOpen(false);
     }, [isMenuOpen])
 
     const fileInputRef = useRef(null);
@@ -112,7 +127,7 @@ export function Menu(){
                             const jsonContent = JSON.parse(content);
                             const retorno = converterJsonParaJson(jsonContent);
                             setTilemap(retorno)
-                        } 
+                        }
                         catch (err) {
                             console.error("Erro ao parsear JSON:", err);
                         }
@@ -134,10 +149,10 @@ export function Menu(){
         event.target.value = null;
     };
 
-    return(        
+    return (
         <Sidebar
             title="Menu"
-            icon={<IoMenu/>}
+            icon={<IoMenu />}
             borderTopRightRadiusButton={15}
             borderBottomRightRadiusButton={15}
             borderBottomRightRadiusBody={15}
@@ -146,34 +161,48 @@ export function Menu(){
             toggleSidebar={isMenuOpen}
             onClick={handleMenuOpen}
             setDisplacementSidebar={setDisplacementSidebarMenu}
-        >   
-            <Modal 
+        >
+            <Modal
                 active={isModal}
                 setActive={setModal}
                 title={modalTitle}
                 showButtonClose={false}
-                onConfirm={(option === 'save' ? save : target)}
+                onConfirm={option === 'save-warning' ? () => setModal(false) : (option === 'save' ? save : target)}
+                singleButton={option === 'save-warning'}
             >
                 <div className={styles.contentModal}>
-                {option === 'save' ? (
-                    <div>
-                        <h2 className={styles.titleModal}> Qual formato deseja salvar o projeto em andamento? </h2>
-                        <select onChange={(e) => setFileFormat(e.target.value)} className={styles.selectTile}>
-                            <option value="json" selected>JSON</option>
-                            <option value="xml">XML</option>
-                        </select>
-                    </div>
-                ) : (
-                    <h2 className={styles.titleModal}>Deseja iniciar um novo mapa?</h2>
-                )}
+                    {option === 'save' ? (
+                        <div>
+                            <h2 className={styles.titleModal}> Qual formato deseja salvar o projeto em andamento? </h2>
+                            <select onChange={(e) => setFileFormat(e.target.value)} className={styles.selectTile}>
+
+                                <option value="json" selected>JSON</option>
+
+                                <option value="xml">XML</option>
+
+                            </select>
+
+                        </div>
+
+                    ) : option === 'save-warning' ? (
+
+                        <h2 className={styles.titleModal}>
+                            É necessário adicionar ao menos um personagem no mapa para salvar
+                        </h2>
+
+                    ) : (
+
+                        <h2 className={styles.titleModal}>Deseja iniciar um novo mapa?</h2>
+
+                    )}
                 </div>
             </Modal>
 
             <div aria-label={"menu"} className={styles.menuContainer} role="menubar">
-                <div className={styles.divider} style={{marginTop: '-10px'}}></div>
-                
-                <div 
-                    className={styles.menuItem} 
+                <div className={styles.divider} style={{ marginTop: '-10px' }}></div>
+
+                <div
+                    className={styles.menuItem}
                     onClick={() => openModal("new")}
                     onKeyDown={(e) => handleKey(e, openModal("new"))}
                     role="menuitem"
@@ -186,8 +215,8 @@ export function Menu(){
 
                 <div className={styles.divider}></div>
 
-                <div 
-                    className={styles.menuItem} 
+                <div
+                    className={styles.menuItem}
                     onClick={() => openModal("save")}
                     onKeyDown={(e) => handleKey(e, openModal("save"))}
                     role="menuitem"
@@ -200,8 +229,8 @@ export function Menu(){
 
                 <div className={styles.divider}></div>
 
-                <div 
-                    className={styles.menuItem} 
+                <div
+                    className={styles.menuItem}
                     tabIndex={0}
                     aria-label={"abrir"}
                 >
@@ -209,11 +238,11 @@ export function Menu(){
                         <FaFolderOpen className={styles.menuIcone} />
                         <h3>{t('open')}</h3>
                     </label>
-                    
-                    <input 
-                        type="file" 
+
+                    <input
+                        type="file"
                         accept=".json, .xml"
-                        id="tile" 
+                        id="tile"
                         ref={fileInputRef}
                         onChange={handleFileChange}
                         style={{ display: "none" }}
