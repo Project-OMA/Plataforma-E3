@@ -33,6 +33,7 @@ export function TileEraser() {
         <div className={styles.positions}>
             <Button
                 info={t('eraser')}
+                active={activeTool === 'eraser'}
                 borderTopLeftRadius={15}
                 borderTopRightRadius={15}
                 borderBottomLeftRadius={15}
