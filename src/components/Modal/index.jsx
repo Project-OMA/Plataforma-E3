@@ -1,29 +1,30 @@
 import styles from './Modal.module.css';
 
-export function Modal({ 
+export function Modal({
     onConfirm,
     buttons = true,
     children,
     active = false,
     setActive,
     showButtonClose = false,
-    title
-}){
+    title,
+    singleButton = false
+}) {
 
     if (!active) return null;
 
-    return(
-        
+    return (
+
         <div className={styles.overlay}>
             <div className={styles.modal}>
 
-                {showButtonClose && 
-                    <button 
-                        className={styles.closeButton} 
-                        onClick={() => setActive(false)} 
+                {showButtonClose &&
+                    <button
+                        className={styles.closeButton}
+                        onClick={() => setActive(false)}
                         aria-label="Fechar modal"
-                    > 
-                        × 
+                    >
+                        ×
                     </button>
                 }
 
@@ -40,19 +41,22 @@ export function Modal({
                 <div className={styles.footer}>
                     {buttons &&
                         <div className={styles.buttons}>
-                            <button 
-                                className={styles.butonPrimary} 
+
+                            <button
+                                className={styles.butonPrimary}
                                 onClick={onConfirm}
                             >
-                                Sim
+                                {singleButton ? "Confirmar" : "Sim"}
                             </button>
-                            
-                            <button 
-                                className={styles.butonSecundary} 
-                                onClick={() => setActive(false)}
-                            >
-                                Não
-                            </button>
+
+                            {!singleButton && (
+                                <button
+                                    className={styles.butonSecundary}
+                                    onClick={() => setActive(false)}
+                                >
+                                    Não
+                                </button>
+                            )}
                         </div>
                     }
                 </div>
